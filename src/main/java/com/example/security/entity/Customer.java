@@ -1,9 +1,15 @@
 package com.example.security.entity;
 
+import java.util.Set;
+
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Customer {
@@ -11,10 +17,13 @@ public class Customer {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
-	
+
 	private String email;
 	private String pwd;
-	private String role;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+	private Set<Authority> authorities;
 
 	public int getId() {
 		return id;
@@ -40,12 +49,12 @@ public class Customer {
 		this.pwd = pwd;
 	}
 
-	public String getRole() {
-		return role;
+	public Set<Authority> getAuthorities() {
+		return authorities;
 	}
 
-	public void setRole(String role) {
-		this.role = role;
+	public void setAuthorities(Set<Authority> authorities) {
+		this.authorities = authorities;
 	}
 
 }
