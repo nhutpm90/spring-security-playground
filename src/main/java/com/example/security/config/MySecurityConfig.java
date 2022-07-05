@@ -33,9 +33,9 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		}).and().csrf().ignoringAntMatchers("/test-post-request02").csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
 		.authorizeRequests()
-			.antMatchers("/myAccount").hasAuthority("WRITE")
-			.antMatchers("/myBalance").hasAuthority("READ")
-			.antMatchers("/myLoans").hasAuthority("DELETE")
+			.antMatchers("/myAccount").hasRole("USER")
+			.antMatchers("/myBalance").hasAnyRole("USER", "ADMIN")
+			.antMatchers("/myLoans").hasRole("ROOT")
 			.antMatchers("/myCards").authenticated()
 			.antMatchers("/notices").permitAll()
 			.antMatchers("/contact").permitAll()
