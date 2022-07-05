@@ -10,9 +10,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import com.example.security.filter.AuthoritiesLoggingAfterFilter;
+import com.example.security.filter.RequestValidationBeforeFilter;
 
 @Configuration
 public class MySecurityConfig extends WebSecurityConfigurerAdapter {
@@ -31,7 +35,13 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter {
 				config.setMaxAge(3600L);
 				return config;
 			}
-		}).and().csrf().ignoringAntMatchers("/test-post-request02").csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
+		})
+		.and()
+			.csrf().ignoringAntMatchers("/test-post-request02")
+			.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+		.and()
+			.addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
+			.addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class)
 		.authorizeRequests()
 			.antMatchers("/myAccount").hasRole("USER")
 			.antMatchers("/myBalance").hasAnyRole("USER", "ADMIN")
@@ -48,5 +58,10 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter {
 	public PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance();
 	}
+	
+//	@Bean
+//	public PasswordEncoder passwordEncoder() {
+//		return new BCryptPasswordEncoder();
+//	}
 
 }
