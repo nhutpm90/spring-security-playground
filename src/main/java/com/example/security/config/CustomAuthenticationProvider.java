@@ -1,8 +1,6 @@
 package com.example.security.config;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +30,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 	public Authentication authenticate(Authentication authentication) {
 		String username = authentication.getName();
 		String pwd = authentication.getCredentials().toString();
-		List<Customer> customer = customerRepo.findByEmail(username);
-		if (customer.size() > 0) {
-			if (passwordEncoder.matches(pwd, customer.get(0).getPwd())) {
-				return new UsernamePasswordAuthenticationToken(username, pwd, convertToGrantedAuthorities(customer.get(0).getAuthorities()));
+		Customer customer = customerRepo.findByEmail(username);
+		if (customer != null) {
+			if (passwordEncoder.matches(pwd, customer.getPwd())) {
+				return new UsernamePasswordAuthenticationToken(username, pwd, convertToGrantedAuthorities(customer.getAuthorities()));
 			} else {
 				throw new BadCredentialsException("Invalid password!");
 			}

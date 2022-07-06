@@ -1,16 +1,14 @@
 package com.example.security.repo;
 
-import java.util.List;
-
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.example.security.entity.Customer;
 
 @Repository
-public interface CustomerRepo extends CrudRepository<Customer, Long> {
+public interface CustomerRepo extends JpaRepository<Customer, Long> {
 
-	List<Customer> findByEmail(String email);
+	Customer findByEmail(String email);
 
 }
 

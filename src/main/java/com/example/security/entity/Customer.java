@@ -1,15 +1,15 @@
 package com.example.security.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Customer {
@@ -21,9 +21,28 @@ public class Customer {
 	private String email;
 	private String pwd;
 
-	@JsonIgnore
-	@OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Set<Authority> authorities;
+
+    public void addAuthority(Authority authority) {
+        if(authority != null) {
+            if(this.authorities == null) {
+                this.authorities = new HashSet<>();
+            }
+            authority.setCustomer(this);
+            this.authorities.add(authority);
+        }
+    }
+    
+	public Customer() {
+		super();
+	}
+
+	public Customer(String email, String pwd) {
+		super();
+		this.email = email;
+		this.pwd = pwd;
+	}
 
 	public int getId() {
 		return id;

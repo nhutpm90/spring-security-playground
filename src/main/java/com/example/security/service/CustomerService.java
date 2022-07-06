@@ -13,12 +13,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.security.constants.SecurityConstants;
 import com.example.security.dto.JwtWrapper;
+import com.example.security.entity.Authority;
 import com.example.security.entity.Customer;
-import com.example.security.filter.JWTTokenValidatorFilter;
 import com.example.security.repo.CustomerRepo;
 import com.example.security.utils.JwtUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,6 +39,9 @@ public class CustomerService {
 	@Autowired
 	private ObjectMapper jsonUtils;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	private String issuer = "My App";
 	private String subject = "JWT Token Test";
 	
@@ -47,7 +51,7 @@ public class CustomerService {
 	public JwtWrapper login(String email, String password) throws JsonProcessingException {
 		Authentication authentication = this.authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email, password));
-		Customer customer = customerRepo.findByEmail(authentication.getPrincipal().toString()).get(0);
+		Customer customer = customerRepo.findByEmail(authentication.getPrincipal().toString());
 		
 		String username = customer.getEmail();
 		String authorities = populateAuthorities(authentication.getAuthorities());
@@ -70,5 +74,30 @@ public class CustomerService {
         	authoritiesSet.add(authority.getAuthority());
         }
         return String.join(",", authoritiesSet);
+	}
+	
+	public Customer save(String email, String password) {
+		Customer customer = new Customer(email, passwordEncoder.encode(password));
+		customer.addAuthority(new Authority("ROLE_USER"));
+		return this.saveIfNotExist(customer);
+	}
+	
+	public Customer saveIfNotExist(Customer customer) {
+		Customer ret = null;
+		if(this.customerRepo.findByEmail(customer.getEmail()) == null) {
+			ret = this.customerRepo.save(customer);
+		}
+		return ret;
+	}
+	
+	public Customer assignRoles(String email, List<String> roles) {
+		Customer ret = null;
+		Customer customer = this.customerRepo.findByEmail(email);
+		if(customer != null) {
+			customer.getAuthorities().clear();
+			roles.forEach(role -> customer.addAuthority(new Authority(role)));
+			ret = this.customerRepo.save(customer);
+		}
+		return ret;
 	}
 }
