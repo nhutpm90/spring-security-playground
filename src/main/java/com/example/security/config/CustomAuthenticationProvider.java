@@ -1,6 +1,7 @@
 package com.example.security.config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		List<Customer> customer = customerRepo.findByEmail(username);
 		if (customer.size() > 0) {
 			if (passwordEncoder.matches(pwd, customer.get(0).getPwd())) {
-				return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(customer.get(0).getAuthorities()));
+				return new UsernamePasswordAuthenticationToken(username, pwd, convertToGrantedAuthorities(customer.get(0).getAuthorities()));
 			} else {
 				throw new BadCredentialsException("Invalid password!");
 			}
@@ -43,8 +44,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		}
 	}
 
-	private List<GrantedAuthority> getGrantedAuthorities(Set<Authority> authorities) {
-		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+	private Set<GrantedAuthority> convertToGrantedAuthorities(Set<Authority> authorities) {
+		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
         for (Authority authority : authorities) {
         	grantedAuthorities.add(new SimpleGrantedAuthority(authority.getName()));
         }
